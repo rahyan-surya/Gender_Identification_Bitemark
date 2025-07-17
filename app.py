@@ -348,16 +348,10 @@ def history():
                            history_data=history_data, 
                            user_display_name=user_display_name)
 
-
 if __name__ == '__main__':
-    if os.environ.get('FLASK_ENV') == 'production':
-        # Gunicorn atau Waitress akan menjalankan aplikasi ini
-        # Tidak perlu app.run() di sini
-        pass 
-    else:
-        # Mode pengembangan lokal
-        if not os.environ.get('FLASK_SECRET_KEY'):
-            print("\n!!! PERINGATAN: FLASK_SECRET_KEY tidak diatur. Sesi tidak akan aman. Pastikan ada di .env !!!\n")
-        if not os.environ.get('SUPABASE_URL') or not os.environ.get('SUPABASE_KEY'):
-            print("\n!!! PERINGATAN: Kredensial Supabase tidak dimuat. Fitur DB/Auth tidak akan berfungsi. Pastikan ada di .env !!!\n")
-        app.run(debug=True, host='0.0.0.0')
+    if not os.environ.get('FLASK_SECRET_KEY'):
+        print("\n!!! PERINGATAN: FLASK_SECRET_KEY tidak diatur. Sesi tidak akan aman. Pastikan ada di .env !!!\n")
+    if not os.environ.get('SUPABASE_URL') or not os.environ.get('SUPABASE_KEY'):
+        print("\n!!! PERINGATAN: Kredensial Supabase tidak dimuat. Fitur DB/Auth tidak akan berfungsi. Pastikan ada di .env !!!\n")
+
+    app.run(debug=True, host='0.0.0.0', port=5000)
