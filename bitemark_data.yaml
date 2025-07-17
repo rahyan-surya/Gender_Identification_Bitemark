@@ -1,0 +1,9 @@
+# bitemark_data.yaml
+train: yolostuff/images/train/
+val: yolostuff/images/val/
+
+# Number of classes
+nc: 2 # Sekarang ada 2 kelas
+
+# Class names
+names: ['bitemark_pria', 'bitemark_wanita'] # Urutan ini penting!

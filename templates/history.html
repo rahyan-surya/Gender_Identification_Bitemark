@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Prediksi</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            {# Logo Aplikasi di Kiri #}
+            <div class="logo-container app-logo-left">
+                <img src="{{ url_for('static', filename='images/bitemark_logo.png') }}" alt="Aplikasi Bitemark Logo" class="app-logo">
+            </div>
+            <span class="app-title">Riwayat Prediksi</span> {# Ubah h1 menjadi span.app-title #}
+            {# Logo Universitas di Kanan #}
+            <div class="logo-container university-logo-right">
+                <img src="{{ url_for('static', filename='images/university_logo.png') }}" alt="Logo Universitas" class="university-logo">
+            </div>
+            <div class="user-info">
+                {% if user_display_name %}
+                    <span>Selamat Datang, <strong>{{ user_display_name }}</strong>!</span>
+                    <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flashes">
+            {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        {% endwith %}
+
+        <div class="history-controls">
+            <a href="{{ url_for('upload_file') }}" class="back-button">← Kembali ke Prediksi</a>
+        </div>
+
+        {% if history_data %}
+            <div class="history-table-container">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Gambar</th>
+                            <th>Gender Diprediksi</th>
+                            <th>Confidence</th>
+                            <th>Waktu Prediksi</th>
+                            <th>Metode</th>
+                            <th>Tanggal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in history_data %}
+                        <tr>
+                            <td>
+                                {% if record.image_url %}
+                                    <img src="{{ record.image_url }}" alt="Prediksi {{ record.id }}" class="history-image-preview">
+                                {% else %}
+                                    Tidak Ada Gambar
+                                {% endif %}
+                            </td>
+                            <td><strong>{{ record.predicted_gender }}</strong></td>
+                            <td>{{ "%.2f" % (record.confidence * 100) if record.confidence is not none else '-' }}%</td>
+                            <td>{{ "%.4f" % record.prediction_time_sec if record.prediction_time_sec is not none else '-' }} detik</td>
+                            <td>{{ record.method_used }}</td>
+                            <td>{{ record.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="no-history-message">Belum ada riwayat prediksi yang tersimpan.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
