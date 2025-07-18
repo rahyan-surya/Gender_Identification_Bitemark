@@ -8,9 +8,8 @@ import time
 from supabase import create_client, Client
 from functools import wraps
 from dotenv import load_dotenv
-from datetime import datetime # Import modul datetime
+from datetime import datetime 
 
-# Muat variabel lingkungan dari file .env
 load_dotenv()
 
 app = Flask(__name__)
@@ -213,7 +212,6 @@ def logout():
     session.pop('user', None) # Hapus user dari sesi Flask
     return redirect(url_for('login'))
 
-# --- Rute Utama Webapp (Membutuhkan Login) ---
 @app.route('/', methods=['GET', 'POST'])
 @login_required
 def upload_file():
@@ -228,11 +226,6 @@ def upload_file():
     
     user_metadata = user.get('user_metadata', {})
     user_display_name = user_metadata.get('display_name', user.get('email', 'Tamu'))
-
-    print(f"DEBUG (Main): Session user data: {session.get('user')}") 
-    print(f"DEBUG (Main): User metadata from session: {user_metadata}") 
-    print(f"DEBUG (Main): Final user_display_name: {user_display_name}") 
-
 
     if request.method == 'POST':
         if 'file' not in request.files:
@@ -260,7 +253,6 @@ def upload_file():
                 confidence_score = None
                 prediction_time = None
             
-            # Simpan Riwayat Prediksi ke Supabase
             if supabase and user and "Error" not in (prediction_result or ""):
                 try:
                     user_id = user.get('id')
@@ -326,17 +318,13 @@ def history():
         try:
             user_id = user.get('id')
             if user_id:
-                # Ambil data riwayat dari Supabase untuk user_id yang sedang login
-                # Urutkan berdasarkan created_at terbaru
                 response = supabase.table("predictions_history").select("*").eq("user_id", user_id).order("created_at", desc=True).execute()
                 
-                print(f"DEBUG (History): Supabase history response: {response}") # DEBUG
+                print(f"DEBUG (History): Supabase history response: {response}")
                 
                 if response and hasattr(response, 'data') and response.data:
-                    # Konversi string created_at menjadi objek datetime
                     for record in response.data:
                         if 'created_at' in record and isinstance(record['created_at'], str):
-                            # Supabase mengembalikan ISO 8601 string, parse dengan fromisoformat
                             record['created_at'] = datetime.fromisoformat(record['created_at'].replace('Z', '+00:00'))
                     history_data = response.data
                 elif response and hasattr(response, 'error') and response.error:
