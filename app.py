@@ -119,8 +119,14 @@ def register():
 
         try:
             res = supabase.auth.sign_up(
-                {"email": email, "password": password, "data": {"display_name": display_name}} 
-            )
+                {"email": email,
+        "password": password,
+        "options": {
+            "data": {
+                "display_name": display_name
+            }
+        }
+                })   
             
             print(f"DEBUG (Register): Supabase sign_up response: {res}")
 

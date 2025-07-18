@@ -9,14 +9,14 @@ def multi_testing_yolov8_gender():
     # --- Konfigurasi ---
     # Path ke model YOLOv8 yang sudah Anda latih
     # Pastikan ini adalah path yang benar ke file best.pt dari pelatihan gender Anda
-    YOLO_MODEL_PATH = 'models/yolov8_gender_detect_v1/weights/best.pt'
+    YOLO_MODEL_PATH = 'models/yolov8_gender_detect_v12/weights/best.pt'
     
     # Path ke folder utama yang berisi data uji Anda
     # Ini harus menunjuk ke folder 'images/test' yang berisi subfolder 'bitemark_pria' dan 'bitemark_wanita'
-    TEST_DATA_ROOT = 'yolostuff/test_PakBambang' 
+    TEST_DATA_ROOT = 'yolostuff/test' 
     
     # Ambang batas confidence untuk deteksi YOLOv8. Deteksi di bawah ini akan diabaikan.
-    CONFIDENCE_THRESHOLD = 0.5 # Bisa disesuaikan (0.25 - 0.75 umumnya)
+    CONFIDENCE_THRESHOLD = 0.5 # Bisa disesuaikan, misal 0.25 jika ingin melihat lebih banyak deteksi
 
     try:
         model = YOLO(YOLO_MODEL_PATH)
@@ -31,11 +31,9 @@ def multi_testing_yolov8_gender():
     hasil_prediksi = []
 
     # Dapatkan nama kelas dari model untuk mapping ID ke nama
-    # Misalnya: ['bitemark_pria', 'bitemark_wanita']
     class_names = model.names 
 
     # Dapatkan daftar subfolder di dalam TEST_DATA_ROOT
-    # Ini diharapkan menjadi 'bitemark_pria' dan 'bitemark_wanita'
     ground_truth_folders = [f for f in os.listdir(TEST_DATA_ROOT) if os.path.isdir(os.path.join(TEST_DATA_ROOT, f))]
     
     if not ground_truth_folders:
@@ -47,14 +45,10 @@ def multi_testing_yolov8_gender():
     print("--------------------------------------------------")
 
     for ground_truth_folder_name in ground_truth_folders:
-        # Ground truth class (misal 'bitemark_pria' atau 'bitemark_wanita')
-        # Kita gunakan nama folder sebagai ground truth label
         ground_truth_label = ground_truth_folder_name.lower() 
 
-        # Path lengkap ke folder gambar untuk gender spesifik ini
         current_gender_folder_path = os.path.join(TEST_DATA_ROOT, ground_truth_folder_name)
         
-        # Dapatkan daftar semua file gambar dalam folder gender ini
         images_in_folder = [f for f in os.listdir(current_gender_folder_path) if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
 
         print(f"\n--- Memproses folder: {ground_truth_folder_name} ({len(images_in_folder)} gambar) ---")
@@ -71,23 +65,22 @@ def multi_testing_yolov8_gender():
                 start_time = time.perf_counter()
 
                 # Lakukan inferensi dengan YOLOv8
-                # imgsz=640 harus konsisten dengan ukuran pelatihan Anda
-                results = model(img, imgsz=640, verbose=False) 
+                results = model(img, imgsz=640, verbose=False) # imgsz=640 harus konsisten dengan ukuran pelatihan
 
                 predicted_gender_label = "Tidak Terdeteksi"
-                highest_confidence = 0.0
+                highest_confidence = 0.0 # Default confidence jika tidak ada deteksi
 
                 # Proses hasil deteksi untuk mendapatkan prediksi gender terbaik
                 for r in results:
                     boxes = r.boxes.xyxy.cpu().numpy()
-                    confidences = r.boxes.conf.cpu().numpy()
+                    confidences = r.boxes.conf.cpu().numpy() # Ambil confidence scores
                     class_ids = r.boxes.cls.cpu().numpy().astype(int)
 
                     for i in range(len(boxes)):
-                        confidence = confidences[i]
+                        confidence = confidences[i] # Confidence dari deteksi ini
                         class_id = class_ids[i]
                         
-                        if confidence > CONFIDENCE_THRESHOLD: # Filter berdasarkan confidence threshold
+                        if confidence >= CONFIDENCE_THRESHOLD: # Gunakan >= agar deteksi di ambang batas disertakan
                             current_detected_label = class_names[class_id]
                             
                             # Pilih deteksi dengan confidence tertinggi sebagai hasil prediksi
@@ -126,7 +119,7 @@ def multi_testing_yolov8_gender():
                     "Nama File": nama_citra,
                     "Ground Truth": ground_truth_label,
                     "Prediksi": "Error",
-                    "Confidence": None,
+                    "Confidence": None, # Jika ada error, confidence tidak tersedia
                     "Benar": "Tidak",
                     "Waktu Proses (detik)": "Error"
                 })
@@ -144,17 +137,13 @@ def multi_testing_yolov8_gender():
         print("⚠️ Tidak ada gambar yang berhasil diproses untuk pengujian.")
         akurasi = 0
 
-# Simpan hasil prediksi ke file CSV
+    # Simpan hasil prediksi ke file CSV
     df = pd.DataFrame(hasil_prediksi)
-    output_csv_path = 'hasil_pengujian_gender2_yolov8.csv'
+    output_csv_path = 'hasil_pengujian_gender_yolov8.csv'
     df.to_csv(output_csv_path, index=False)
     print(f"📄 Hasil pengujian detail disimpan ke '{output_csv_path}'")
 
     return akurasi
 
-
 if __name__ == "__main__":
-    # Pastikan Anda menjalankan script ini dari folder proyek_bitemark_yolo Anda
-    # Contoh: cd C:\Path\To\Your\proyek_bitemark_yolo
-    # python multi_testing_yolov8_gender.py
     multi_testing_yolov8_gender()
