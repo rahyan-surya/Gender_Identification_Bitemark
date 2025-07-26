@@ -6,16 +6,8 @@ from ultralytics import YOLO
 import time
 
 def multi_testing_yolov8_gender():
-    # --- Konfigurasi ---
-    # Path ke model YOLOv8 yang sudah Anda latih
-    # Pastikan ini adalah path yang benar ke file best.pt dari pelatihan gender Anda
     YOLO_MODEL_PATH = 'models/yolov8_gender_detect_v12/weights/best.pt'
-    
-    # Path ke folder utama yang berisi data uji Anda
-    # Ini harus menunjuk ke folder 'images/test' yang berisi subfolder 'bitemark_pria' dan 'bitemark_wanita'
     TEST_DATA_ROOT = 'yolostuff/test' 
-    
-    # Ambang batas confidence untuk deteksi YOLOv8. Deteksi di bawah ini akan diabaikan.
     CONFIDENCE_THRESHOLD = 0.5 # Bisa disesuaikan, misal 0.25 jika ingin melihat lebih banyak deteksi
 
     try:
@@ -139,7 +131,7 @@ def multi_testing_yolov8_gender():
 
     # Simpan hasil prediksi ke file CSV
     df = pd.DataFrame(hasil_prediksi)
-    output_csv_path = 'hasil_pengujian_gender_yolov8.csv'
+    output_csv_path = 'hasil_pengujian_gender2_yolov8.csv'
     df.to_csv(output_csv_path, index=False)
     print(f"📄 Hasil pengujian detail disimpan ke '{output_csv_path}'")
 
