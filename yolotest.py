@@ -8,7 +8,7 @@ import time
 def multi_testing_yolov8_gender():
     YOLO_MODEL_PATH = 'models/yolov8_gender_detect_v12/weights/best.pt'
     TEST_DATA_ROOT = 'yolostuff/test' 
-    CONFIDENCE_THRESHOLD = 0.5 # Bisa disesuaikan, misal 0.25 jika ingin melihat lebih banyak deteksi
+    CONFIDENCE_THRESHOLD = 0.5 
 
     try:
         model = YOLO(YOLO_MODEL_PATH)
@@ -55,8 +55,6 @@ def multi_testing_yolov8_gender():
 
             try:
                 start_time = time.perf_counter()
-
-                # Lakukan inferensi dengan YOLOv8
                 results = model(img, imgsz=640, verbose=False) # imgsz=640 harus konsisten dengan ukuran pelatihan
 
                 predicted_gender_label = "Tidak Terdeteksi"
@@ -69,13 +67,13 @@ def multi_testing_yolov8_gender():
                     class_ids = r.boxes.cls.cpu().numpy().astype(int)
 
                     for i in range(len(boxes)):
-                        confidence = confidences[i] # Confidence dari deteksi ini
+                        confidence = confidences[i] 
                         class_id = class_ids[i]
                         
-                        if confidence >= CONFIDENCE_THRESHOLD: # Gunakan >= agar deteksi di ambang batas disertakan
+                        if confidence >= CONFIDENCE_THRESHOLD: 
                             current_detected_label = class_names[class_id]
                             
-                            # Pilih deteksi dengan confidence tertinggi sebagai hasil prediksi
+                        
                             if confidence > highest_confidence:
                                 highest_confidence = confidence
                                 predicted_gender_label = current_detected_label
